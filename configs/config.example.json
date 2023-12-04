@@ -1,0 +1,17 @@
+{
+  "redis": {
+    "url": "redis://user:pass@host:port",
+    "host": "redis_host",
+    "port": 6371,
+    "password": "<password>",
+    "poll_interval": "60s",
+    "notify_queue_size": 15000
+  },
+  "telegram": {
+    "token": "<tele_bot_token>",
+    "chat_id": -100999999999999,
+    "sidekiq_topic_id": 31
+  }
+}
+
+

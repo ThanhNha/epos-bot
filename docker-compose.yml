@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  epos-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: epos_bot_c
+    # volumes:
+    #   - .:/app
+    # restart: always
+    # environment:0
+    command: ["go", "run", "."]
