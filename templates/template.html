@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{.Title}}</title>
+  </head>
+  <body>
+    <style>
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      table,
+      table th,
+      table td {
+        border: 1px solid #ccc;
+      }
+      table th,
+      table td {
+        padding: 0.5rem;
+      }
+      table th {
+        position: relative;
+        cursor: grab;
+        user-select: none;
+      }
+      table > tbody > tr:hover {
+        background: rgba(0, 0, 0, 0.075);
+      }
+    </style>
+    <h1>{{.Heading}}</h1>
+    <input
+      type="search"
+      class="epos-filter-input"
+      data-table="epos-report-revision"
+      placeholder="Filtrer"
+    />
+    <table class="epos-report-revision">
+      <thead>
+        <tr>
+          <th></th>
+          {{range .ColTitle}}
+          <th><span>{{.}}</span></th>
+          {{end}}
+        </tr>
+      </thead>
+      <tbody>
+        {{range .ColContent}}
+        <tr>
+          <td><span class="stt"></span></td>
+          <td><span>{{.Name}}</span></td>
+          <td><span>{{.Author}}</span></td>
+          <td><a href="{{.URL}}">{{.URL}}</a></td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+  </body>
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+    integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  ></script>
+  <script>
+    div = document.getElementsByTagName("td");
+    // sort start
+    var thIndex = 0,
+      curThIndex = null;
+
+    $(function () {
+      $(".epos-report-revision tbody tr").each(function (index, ele) {
+        $(this)
+          .find(".stt")
+          .text(index + 1);
+      });
+      $(".epos-report-revision thead tr th").click(function () {
+        thIndex = $(this).index();
+        if (thIndex != curThIndex) {
+          curThIndex = thIndex;
+          sorting = [];
+          tbodyHtml = null;
+          $(".epos-report-revision tbody tr").each(function () {
+            sorting.push(
+              $(this).children("td").eq(curThIndex).html() +
+                ", " +
+                $(this).index()
+            );
+          });
+
+          sorting = sorting.sort();
+          sortIt();
+        }
+      });
+    });
+
+    function sortIt() {
+      for (
+        var sortingIndex = 0;
+        sortingIndex < sorting.length;
+        sortingIndex++
+      ) {
+        rowId = parseInt(sorting[sortingIndex].split(", ")[1]);
+        tbodyHtml =
+          tbodyHtml +
+          $(".epos-report-revision tbody tr").eq(rowId)[0].outerHTML;
+      }
+      $(".epos-report-revision tbody").html(tbodyHtml);
+    }
+
+    (function (document) {
+      "use strict";
+
+      var TableFilter = (function (Arr) {
+        var _input;
+
+        function _onInputEvent(e) {
+          _input = e.target;
+          var tables = document.getElementsByClassName(
+            _input.getAttribute("data-table")
+          );
+          Arr.forEach.call(tables, function (table) {
+            Arr.forEach.call(table.tBodies, function (tbody) {
+              Arr.forEach.call(tbody.rows, _filter);
+            });
+          });
+        }
+
+        function _filter(row) {
+          var text = row.textContent.toLowerCase(),
+            val = _input.value.toLowerCase();
+          row.style.display = text.indexOf(val) === -1 ? "none" : "table-row";
+        }
+
+        return {
+          init: function () {
+            var inputs = document.getElementsByClassName("epos-filter-input");
+            Arr.forEach.call(inputs, function (input) {
+              input.oninput = _onInputEvent;
+            });
+          },
+        };
+      })(Array.prototype);
+
+      document.addEventListener("readystatechange", function () {
+        if (document.readyState === "complete") {
+          TableFilter.init();
+        }
+      });
+    })(document);
+  </script>
+</html>

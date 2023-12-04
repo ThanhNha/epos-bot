@@ -2,7 +2,7 @@
   "phabricator": {
     "url": "https://pm.floatingcube.com",
     "token": "api-xpgyn7qc4j6khlxqcgkwurrahshc",
-    "poll_interval": "60s"
+    "poll_interval": "10s"
   },
   "telegram": {
     "token": "6611988217:AAERCNw3lNbdpABmMztQudQXBuPcp1jsKdk",

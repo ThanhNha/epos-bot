@@ -3,14 +3,30 @@ package phab_bot
 import (
 	"epos-bot/pkg/util"
 	"fmt"
+	"log"
+	"time"
 
 	"github.com/uber/gonduit"
+	"github.com/uber/gonduit/core"
 	"github.com/uber/gonduit/requests"
 )
 
 var phabricatorClient *gonduit.Conn
 
-func GetListRevisionsOfWeek() ([]TableContent, error) {
+func GetListRevisionsOfWeek(PhabricatorUrl string, PhabricatorToken string) ([]TableContent, error) {
+
+	// Connect to Phabricator
+	var err error
+
+	phabricatorClient, err = gonduit.Dial(PhabricatorUrl, &core.ClientOptions{
+		APIToken: PhabricatorToken,
+		Timeout:  time.Second * 20,
+	})
+
+	if err != nil {
+		log.Fatalf("Error connecting to phabricator, %s", err)
+	}
+
 	diff, err := phabricatorClient.DifferentialRevisionSearch(requests.DifferentialRevisionSearchRequest{
 		QueryKey: "active",
 		Attachments: &requests.DifferentialRevisionSearchAttachments{

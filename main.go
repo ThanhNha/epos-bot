@@ -13,6 +13,8 @@ import (
 
 var telegramClient *tgbotapi.BotAPI
 
+var phabricatorClient *gonduit.Conn
+
 func ReadConfig() (tgbotapi.Chat, error) {
 	viper.SetConfigName("phab-bot")
 	viper.SetConfigType("json")
@@ -46,15 +48,13 @@ func ReadConfig() (tgbotapi.Chat, error) {
 
 }
 
-func ConnectToPhab() (*gonduit.Conn, error) {
-	phabricatorClient, err := gonduit.Dial(viper.GetString("phabricator.url"), &core.ClientOptions{
+func initPhabricatorClient() error {
+	var err error
+	phabricatorClient, err = gonduit.Dial(viper.GetString("phabricator.url"), &core.ClientOptions{
 		APIToken: viper.GetString("phabricator.token"),
 		Timeout:  time.Second * 20,
 	})
-	if err != nil {
-		log.Fatalf("Error connecting to phabricator, %s", err)
-	}
-	return phabricatorClient, nil
+	return err
 }
 
 func main() {
@@ -70,6 +70,13 @@ func main() {
 
 	log.Printf("Will send messages to %#v", chat.Title)
 
+	// Initialize the phabricatorClient variable
+	err = initPhabricatorClient()
+	if err != nil {
+		log.Fatalf("Error initializing phabricator client: %s", err)
+	}
+
 	// init phabricator bot telegram
-	phab_bot.Init(telegramClient)
+	phab_bot.FeedActivity(telegramClient)
+
 }

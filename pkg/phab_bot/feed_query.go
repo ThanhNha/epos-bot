@@ -13,6 +13,7 @@ import (
 	"github.com/uber/gonduit/requests"
 )
 
+
 // fetchFeed calls feed.query and then uses PHIDLookup to get the actual data for each feed item.
 func FetchFeed(PhabricatorUrl string, PhabricatorToken string) ([]FeedItem, error) {
 	var feed map[string]FeedQueryResponseItem
