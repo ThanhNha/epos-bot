@@ -16,7 +16,7 @@ var telegramClient *tgbotapi.BotAPI
 var phabricatorClient *gonduit.Conn
 
 func ReadConfig() (tgbotapi.Chat, error) {
-	viper.SetConfigName("phab-bot")
+	viper.SetConfigName("config")
 	viper.SetConfigType("json")
 	viper.AddConfigPath("./configs")
 	err := viper.ReadInConfig()

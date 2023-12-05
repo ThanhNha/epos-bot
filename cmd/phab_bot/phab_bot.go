@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"epos-bot/pkg/phab_bot"
@@ -21,6 +23,8 @@ var phabricatorClient *gonduit.Conn
 func FeedActivity(telegramClient *tgbotapi.BotAPI) {
 
 	notifyTypes := viper.GetStringSlice("telegram.notify_types")
+
+	TopicForTypes := viper.GetStringMapString("telegram.topic_id_mapping")
 
 	if len(notifyTypes) == 0 {
 		notifyTypes = []string{"TASK", "DREV", "WIKI"}
@@ -69,7 +73,9 @@ func FeedActivity(telegramClient *tgbotapi.BotAPI) {
 
 			text := phab_bot.PrepareMessage(v)
 
-			msg := tgbotapi.NewThreadMessage(viper.GetInt64("telegram.chat_id"), phab_bot.TopicForTypes[v.Type], text)
+			topicID, err := strconv.Atoi(TopicForTypes[strings.ToLower(v.Type)])
+
+			msg := tgbotapi.NewThreadMessage(viper.GetInt64("telegram.chat_id"), topicID, text)
 			msg.ParseMode = "HTML"
 			msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
 				tgbotapi.NewInlineKeyboardRow(
@@ -77,7 +83,7 @@ func FeedActivity(telegramClient *tgbotapi.BotAPI) {
 				),
 			)
 
-			_, err := telegramClient.Send(msg)
+			_, err = telegramClient.Send(msg)
 
 			if err != nil {
 				log.Printf("Sending message errir %v", err)

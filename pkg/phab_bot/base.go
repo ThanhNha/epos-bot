@@ -82,12 +82,6 @@ var EmojiForTypes = map[string]string{
 	"DREV": "🚀",
 }
 
-var TopicForTypes = map[string]int{
-	"WIKI": 244,
-	"TASK": 67,
-	"DREV": 2,
-}
-
 var EmojiForActions = map[string]string{
 
 	"created":  "\U0001F4A1",

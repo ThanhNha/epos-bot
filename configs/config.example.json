@@ -1,17 +1,42 @@
 {
-  "redis": {
-    "url": "redis://user:pass@host:port",
-    "host": "redis_host",
-    "port": 6371,
-    "password": "<password>",
-    "poll_interval": "60s",
-    "notify_queue_size": 15000
+  "phabricator": {
+    "url": "https://pm.floatingcube.com",
+    "token": "<Conduit API Tokens>",
+    "poll_interval": "60s"
   },
   "telegram": {
-    "token": "<tele_bot_token>",
-    "chat_id": -100999999999999,
-    "sidekiq_topic_id": 31
+    "token": "<BOT_TOKEN>",
+    "chat_id": "group_chat_id",
+    "topic_id_mapping": {
+      "WIKI": "toppic_id",
+      "TASK": "toppic_id",
+      "DREV": "toppic_id"
+    },
+    "notify_types": [
+      "WIKI",
+      "TASK",
+      "DREV"
+    ]
+  },
+  "reviewers": {
+    "neyugn.luan": "luan_neyugn",
+    "tuan": "tuan1801",
+    "thai": "thai_pn",
+    "viethoang": "viiethoang",
+    "tuanhh": "tuanhh_itg",
+    "trile97": "letri97",
+    "tuanta91": "tuanta91",
+    "tan": "ngmitan149",
+    "tan.pham": "tanpham2604",
+    "thovo93": "thorvn",
+    "ntduyfit": "ntduyfit",
+    "pdkhoa99": "pdkhoa99",
+    "lusinh": "Lu_Sinh",
+    "nha_thanh_024": "nha_thanh_024",
+    "toannm": "toannm27",
+    "truongkyit": "kylnt99",
+    "TrucQuynh": "TrucQuynhPhan",
+    "minhvu": "min_dzux",
+    "ViBui": "vibuiitus"
   }
 }
-
-

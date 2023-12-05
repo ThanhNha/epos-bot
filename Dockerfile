@@ -21,7 +21,7 @@ RUN mkdir -p /app && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
 FROM golang:alpine AS prod
 COPY --from=builder /app/epos_bot /app/epos_bot
 WORKDIR /build/epos_bot
-COPY ./configs/phab-bot.json /build/epos_bot/configs/phab-bot.json
+COPY ./configs/config.json /build/epos_bot/configs/config.json
 
 LABEL org.opencontainers.image.description A docker image for the epos_bot telegram bot.
 

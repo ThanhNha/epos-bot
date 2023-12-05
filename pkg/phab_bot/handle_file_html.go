@@ -25,7 +25,6 @@ func CreateHtmlFile(tableContent []TableContent) error {
 
 	// Init create File
 	outputPath := filepath.Join("static", "revisions.html")
-	// Create the file
 
 	file, err := os.Create(outputPath)
 
