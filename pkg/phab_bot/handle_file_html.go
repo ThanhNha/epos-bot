@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 type TableRevisions struct {
@@ -12,7 +13,7 @@ type TableRevisions struct {
 	Heading    string
 	ColTitle   []string
 	ColContent []TableContent
-	Style      string
+	Date       string
 }
 type TableContent struct {
 	Name   string
@@ -44,14 +45,10 @@ func CreateHtmlFile(tableContent []TableContent) error {
 		"URL",
 	}
 
-	var styleCss string
-
-	styleCss = ""
-
 	tableRevisions.ColTitle = colHeading
 	tableRevisions.Title = "EPOS - LIST - REVISIONS"
-	tableRevisions.Heading = "Hello"
-	tableRevisions.Style = styleCss
+	tableRevisions.Heading = "List revision on active"
+	tableRevisions.Date = time.Now().Format("01/02/06")
 
 	for _, item := range tableContent {
 		tableRevisions.ColContent = append(tableRevisions.ColContent, TableContent{

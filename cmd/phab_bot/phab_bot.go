@@ -44,7 +44,7 @@ func FeedActivity(telegramClient *tgbotapi.BotAPI) {
 		}
 
 		// Check Condition to excute func send report
-		if weekday == time.Monday && hour == 16 || weekday == time.Friday && hour == 18 {
+		if weekday == time.Monday && hour == 9 || weekday == time.Friday && hour == 18 {
 
 			if !flag {
 				result, _ := SendReportRevisions(telegramClient)

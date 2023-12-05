@@ -7,6 +7,64 @@
   </head>
   <body>
     <style>
+      a{
+        text-decoration: none;
+        color: #1b459b;
+      }
+      .wrapper-header{
+        display: flex;
+        margin-bottom: 20px;
+      }
+      .left-header{
+        width: 60%;
+
+      }
+      .title-report{
+        font-size: 25px;
+        text-align: center;
+        color: #1b459b;
+        }
+      .input-filter{
+        display: flex;
+        justify-content: end;
+        width: 40%;
+        margin-bottom: 0;
+      align-items: flex-end;
+      }
+      .wrapper-table{
+        overflow-x: auto;
+      }
+      .wrapper-table table{
+        min-width: 800px;
+        min-height: 400px;
+      }
+      [type="search"] {
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 0;
+  outline: none;
+  appearance: none;
+}
+
+[type="search"] {
+  width: inherit;
+  border-radius: 5px;
+  background: #fff;
+  padding: 8px;
+  font-size: 16px;
+  font-weight: 400;
+  font-family: inherit;
+  border: 1px solid #666;
+  width: 400px;
+  height: 36px;
+
+}
+[type="search"]:hover, [type="search"]:focus {
+  border-color: #1b459b;
+  
+}
       table {
         border-collapse: collapse;
         width: 100%;
@@ -24,38 +82,54 @@
         position: relative;
         cursor: grab;
         user-select: none;
+        color: #1b459b;
       }
       table > tbody > tr:hover {
         background: rgba(0, 0, 0, 0.075);
       }
     </style>
-    <h1>{{.Heading}}</h1>
-    <input
-      type="search"
-      class="epos-filter-input"
-      data-table="epos-report-revision"
-      placeholder="Filtrer"
-    />
-    <table class="epos-report-revision">
-      <thead>
-        <tr>
-          <th></th>
-          {{range .ColTitle}}
-          <th><span>{{.}}</span></th>
+    <div class="wrapper-header">
+      <div class="left-header">
+        <h1 class="title-report">{{.Heading}}</h1>
+        <div class="info-report">
+          <div class="info">
+            <span>Date:</span>
+            <span>{{.Date}}</span>
+          </div>
+        </div>
+      </div>
+      <div class="input-filter">
+        <input
+          type="search"
+          class="epos-filter-input"
+          data-table="epos-report-revision"
+          placeholder="Filter revision "
+        />
+      </div>
+    </div>
+    <div class="wrapper-table">
+      <table class="epos-report-revision">
+        <thead>
+          <tr>
+            <th></th>
+            {{range .ColTitle}}
+            <th><span>{{.}}</span></th>
+            {{end}}
+          </tr>
+        </thead>
+        <tbody>
+          {{range .ColContent}}
+          <tr>
+            <td><span class="stt"></span></td>
+            <td><span>{{.Name}}</span></td>
+            <td><span>{{.Author}}</span></td>
+            <td><a href="{{.URL}}">{{.URL}}</a></td>
+          </tr>
           {{end}}
-        </tr>
-      </thead>
-      <tbody>
-        {{range .ColContent}}
-        <tr>
-          <td><span class="stt"></span></td>
-          <td><span>{{.Name}}</span></td>
-          <td><span>{{.Author}}</span></td>
-          <td><a href="{{.URL}}">{{.URL}}</a></td>
-        </tr>
-        {{end}}
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    </div>
+    
   </body>
   <script
     src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
