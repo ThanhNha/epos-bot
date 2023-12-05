@@ -55,7 +55,7 @@ func CreateHtmlFile(tableContent []TableContent) error {
 
 	tableRevisions.ColTitle = colHeading
 	tableRevisions.Title = "EPOS - LIST - REVISIONS"
-	tableRevisions.Heading = "Daily report revision on active"
+	tableRevisions.Heading = "Daily report revisions on active"
 	tableRevisions.Date = time.Now().Format("02/01/06")
 
 	for _, item := range tableContent {
