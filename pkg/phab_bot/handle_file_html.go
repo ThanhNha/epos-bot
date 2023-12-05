@@ -16,9 +16,11 @@ type TableRevisions struct {
 	Date       string
 }
 type TableContent struct {
-	Name   string
-	Author string
-	URL    string
+	Name    string
+	Author  string
+	URL     string
+	Status  string
+	Project string
 }
 
 func CreateHtmlFile(tableContent []TableContent) error {
@@ -33,15 +35,21 @@ func CreateHtmlFile(tableContent []TableContent) error {
 		return err
 	}
 
+	if len(tableContent) == 0 {
+		fmt.Println("Error creating file:", err)
+		return err
+	}
+
 	defer file.Close()
 
 	// Get data
 	var tableRevisions TableRevisions
 
 	colHeading := []string{
-		"Name",
+		"Title Revison",
 		"Author",
 		"URL",
+		"Status",
 	}
 
 	tableRevisions.ColTitle = colHeading
@@ -54,6 +62,7 @@ func CreateHtmlFile(tableContent []TableContent) error {
 			Name:   item.Name,
 			Author: item.Author,
 			URL:    item.URL,
+			Status: item.Status,
 		})
 	}
 

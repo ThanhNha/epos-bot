@@ -7,64 +7,65 @@
   </head>
   <body>
     <style>
-      a{
+      a {
         text-decoration: none;
         color: #1b459b;
       }
-      .wrapper-header{
+      .wrapper-header {
         display: flex;
-        margin-bottom: 20px;
+        margin-bottom: 10px;
       }
-      .left-header{
+      .left-header {
         width: 60%;
+        text-align: center;
 
       }
-      .title-report{
+      .title-report {
         font-size: 25px;
         text-align: center;
         color: #1b459b;
-        }
-      .input-filter{
+        margin: 10px 0;
+      }
+      .input-filter {
         display: flex;
         justify-content: end;
         width: 40%;
         margin-bottom: 0;
-      align-items: flex-end;
+        align-items: flex-end;
       }
-      .wrapper-table{
+      .wrapper-table {
         overflow-x: auto;
       }
-      .wrapper-table table{
+      .wrapper-table table {
         min-width: 800px;
         min-height: 400px;
       }
       [type="search"] {
-  margin: 0;
-  padding: 0;
-  background: none;
-  border: none;
-  border-radius: 0;
-  outline: none;
-  appearance: none;
-}
+        margin: 0;
+        padding: 0;
+        background: none;
+        border: none;
+        border-radius: 0;
+        outline: none;
+        appearance: none;
+      }
 
-[type="search"] {
-  width: inherit;
-  border-radius: 5px;
-  background: #fff;
-  padding: 8px;
-  font-size: 16px;
-  font-weight: 400;
-  font-family: inherit;
-  border: 1px solid #666;
-  width: 400px;
-  height: 36px;
-
-}
-[type="search"]:hover, [type="search"]:focus {
-  border-color: #1b459b;
-  
-}
+      [type="search"] {
+        width: inherit;
+        border-radius: 5px;
+        background: #fff;
+        padding: 8px;
+        font-size: 16px;
+        font-weight: 400;
+        font-family: inherit;
+        border: 1px solid #666;
+        width: 400px;
+        height: 36px;
+      }
+      [type="search"]:hover,
+      [type="search"]:focus {
+        border-color: #1b459b;
+      }
       table {
         border-collapse: collapse;
         width: 100%;
@@ -87,6 +88,24 @@
       table > tbody > tr:hover {
         background: rgba(0, 0, 0, 0.075);
       }
+    </style>
+    <style>
+      @media (max-width: 768px) { 
+        .wrapper-header{
+          flex-direction: column;
+        }
+        .left-header{
+          width: 100%;
+        }
+        .input-filter{
+          width: 90%;
+          margin: 0 auto;
+
+        }
+        .info-report{
+          margin-bottom: 10px;
+        }
+       }
     </style>
     <div class="wrapper-header">
       <div class="left-header">
@@ -124,6 +143,8 @@
             <td><span>{{.Name}}</span></td>
             <td><span>{{.Author}}</span></td>
             <td><a href="{{.URL}}">{{.URL}}</a></td>
+            <td><span>{{.Status}}</span></td>
+
           </tr>
           {{end}}
         </tbody>

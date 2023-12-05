@@ -8,6 +8,6 @@ services:
     container_name: epos_bot_c
     # volumes:
     #   - .:/app
-    # restart: always
+    restart: always
     # environment:0
     command: ["go", "run", "."]

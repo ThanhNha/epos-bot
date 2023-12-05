@@ -56,6 +56,7 @@ func GetListRevisionsOfWeek(PhabricatorUrl string, PhabricatorToken string) ([]T
 			Name:   item.Fields.Title,
 			Author: lookedUpPhids[item.Fields.AuthorPHID].Name,
 			URL:    lookedUpPhids[item.ResponseObject.PHID].URI,
+			Status: item.Fields.Status.Name,
 		})
 
 	}
