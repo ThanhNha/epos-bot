@@ -4,6 +4,7 @@ import (
 	"epos-bot/pkg/util"
 	"fmt"
 	"log"
+	"sort"
 	"time"
 
 	"github.com/uber/gonduit"
@@ -29,9 +30,6 @@ func GetListRevisionsOfWeek(PhabricatorUrl string, PhabricatorToken string) ([]T
 
 	diff, err := phabricatorClient.DifferentialRevisionSearch(requests.DifferentialRevisionSearchRequest{
 		QueryKey: "active",
-		Attachments: &requests.DifferentialRevisionSearchAttachments{
-			Projects: true,
-		},
 	})
 
 	if err != nil {
@@ -60,5 +58,10 @@ func GetListRevisionsOfWeek(PhabricatorUrl string, PhabricatorToken string) ([]T
 		})
 
 	}
+
+	sort.Slice(RevisionList, func(i, j int) bool {
+		return RevisionList[i].Author < RevisionList[j].Author
+	})
+
 	return RevisionList, nil
 }

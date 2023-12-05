@@ -7,6 +7,9 @@
   </head>
   <body>
     <style>
+      html {
+        font-family: Helvetica, Arial, sans-serif;
+      }
       a {
         text-decoration: none;
         color: #1b459b;
@@ -17,12 +20,19 @@
       }
       .left-header {
         width: 60%;
-        text-align: center;
-
+        text-align: left;
+      }
+      .info span {
+        line-height: 18px;
+      }
+      .bold {
+        font-weight: bold;
       }
       .title-report {
         font-size: 25px;
-        text-align: center;
+        text-align: left;
+        text-transform: uppercase;
+        font-weight: bold;
         color: #1b459b;
         margin: 10px 0;
       }
@@ -84,28 +94,33 @@
         cursor: grab;
         user-select: none;
         color: #1b459b;
+        text-transform: uppercase;
+        font-weight: bold;
       }
       table > tbody > tr:hover {
         background: rgba(0, 0, 0, 0.075);
       }
     </style>
     <style>
-      @media (max-width: 768px) { 
-        .wrapper-header{
+      @media (max-width: 768px) {
+        .wrapper-header {
           flex-direction: column;
         }
-        .left-header{
+        .left-header {
           width: 100%;
+          text-align: center;
         }
-        .input-filter{
+        .title-report {
+          text-align: center;
+        }
+        .input-filter {
           width: 90%;
           margin: 0 auto;
-
         }
-        .info-report{
+        .info-report {
           margin-bottom: 10px;
         }
-       }
+      }
     </style>
     <div class="wrapper-header">
       <div class="left-header">
@@ -114,6 +129,10 @@
           <div class="info">
             <span>Date:</span>
             <span>{{.Date}}</span>
+          </div>
+          <div class="info">
+            <span>Total Revisons:</span>
+            <span class="bold">{{.Total}}</span>
           </div>
         </div>
       </div>
@@ -130,7 +149,6 @@
       <table class="epos-report-revision">
         <thead>
           <tr>
-            <th></th>
             {{range .ColTitle}}
             <th><span>{{.}}</span></th>
             {{end}}
@@ -139,18 +157,17 @@
         <tbody>
           {{range .ColContent}}
           <tr>
-            <td><span class="stt"></span></td>
-            <td><span>{{.Name}}</span></td>
+            <td>
+              <a href="{{.URL}}"><span>{{.Name}}</span></a>
+            </td>
             <td><span>{{.Author}}</span></td>
             <td><a href="{{.URL}}">{{.URL}}</a></td>
             <td><span>{{.Status}}</span></td>
-
           </tr>
           {{end}}
         </tbody>
       </table>
     </div>
-    
   </body>
   <script
     src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
@@ -165,11 +182,6 @@
       curThIndex = null;
 
     $(function () {
-      $(".epos-report-revision tbody tr").each(function (index, ele) {
-        $(this)
-          .find(".stt")
-          .text(index + 1);
-      });
       $(".epos-report-revision thead tr th").click(function () {
         thIndex = $(this).index();
         if (thIndex != curThIndex) {

@@ -14,6 +14,7 @@ type TableRevisions struct {
 	ColTitle   []string
 	ColContent []TableContent
 	Date       string
+	Total      int
 }
 type TableContent struct {
 	Name    string
@@ -26,7 +27,7 @@ type TableContent struct {
 func CreateHtmlFile(tableContent []TableContent) error {
 
 	// Init create File
-	outputPath := filepath.Join("static", "revisions.html")
+	outputPath := filepath.Join("static", "daily-report-revisions.html")
 
 	file, err := os.Create(outputPath)
 
@@ -54,8 +55,8 @@ func CreateHtmlFile(tableContent []TableContent) error {
 
 	tableRevisions.ColTitle = colHeading
 	tableRevisions.Title = "EPOS - LIST - REVISIONS"
-	tableRevisions.Heading = "List revision on active"
-	tableRevisions.Date = time.Now().Format("01/02/06")
+	tableRevisions.Heading = "Daily report revision on active"
+	tableRevisions.Date = time.Now().Format("02/01/06")
 
 	for _, item := range tableContent {
 		tableRevisions.ColContent = append(tableRevisions.ColContent, TableContent{
@@ -65,6 +66,7 @@ func CreateHtmlFile(tableContent []TableContent) error {
 			Status: item.Status,
 		})
 	}
+	tableRevisions.Total = len(tableContent)
 
 	tmpl, err := template.ParseFiles("templates/template.html")
 

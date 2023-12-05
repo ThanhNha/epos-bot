@@ -37,18 +37,17 @@ func FeedActivity(telegramClient *tgbotapi.BotAPI) {
 	}
 
 	var lastMsgTime = time.Now()
-	weekday := lastMsgTime.Weekday()
 	hour := lastMsgTime.Hour()
 	flag := false
 
 	for {
 		//reset flag
-		if weekday != time.Monday && weekday != time.Friday && flag {
+		if hour != 9 && hour != 18 && flag {
 			flag = false
 		}
 
 		// Check Condition to excute func send report
-		if weekday == time.Monday && hour == 9 || weekday == time.Friday && hour == 18 {
+		if hour == 9 || hour == 18 {
 
 			if !flag {
 				result, _ := SendReportRevisions(telegramClient)
@@ -116,7 +115,7 @@ func SendReportRevisions(telegramClient *tgbotapi.BotAPI) (bool, error) {
 
 	// Start get file to send telegram
 
-	filePath := "./static/revisions.html"
+	filePath := "./static/daily-report-revisions.html"
 	file, err := os.Open(filePath)
 
 	if err != nil {
