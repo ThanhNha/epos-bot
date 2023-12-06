@@ -37,22 +37,23 @@ func FeedActivity(telegramClient *tgbotapi.BotAPI) {
 	}
 
 	var lastMsgTime = time.Now()
-	hour := lastMsgTime.Hour()
-	flag := false
 
 	for {
+		flag := false
+		var CurrentTime = time.Now()
+		hour := CurrentTime.Hour()
+		minute := CurrentTime.Minute()
 		//reset flag
 		if hour != 9 && hour != 18 && flag {
 			flag = false
 		}
 
 		// Check Condition to excute func send report
-		if hour == 9 || hour == 18 {
+		if !flag && hour == 9 && minute == 20 || hour == 9 && minute == 25 {
 
-			if !flag {
-				result, _ := SendReportRevisions(telegramClient)
-				flag = result
-			}
+			result, _ := SendReportRevisions(telegramClient)
+			//sent, active flag to prevent send
+			flag = result
 
 		}
 
