@@ -22,14 +22,11 @@ var phabricatorClient *gonduit.Conn
 
 func FeedActivity(telegramClient *tgbotapi.BotAPI) {
 
-	fmt.Println("feedItems")
-
 	notifyTypes := phab_bot.GetNotifyTypes()
 
 	notifyTypesMap := phab_bot.CreateNotifyTypesMap(notifyTypes)
 
 	lastMsgTime := time.Now()
-	feedItems := make([]phab_bot.FeedItem,0,1000)
 	for {
 		var flag bool
 		currentTime := time.Now()
@@ -39,9 +36,7 @@ func FeedActivity(telegramClient *tgbotapi.BotAPI) {
 
 		CheckAndSendReport(&flag, hour, telegramClient)
 
-		phab_bot.FetchFeedItems(feedItems)
-
-		ProcessFeedItems(feedItems, notifyTypesMap, &lastMsgTime)
+		ProcessFeedItems(notifyTypesMap, &lastMsgTime, telegramClient)
 
 		pollInterval := viper.GetDuration("phabricator.poll_interval")
 
@@ -99,10 +94,14 @@ func SendReportRevisions(telegramClient *tgbotapi.BotAPI) (bool, error) {
 
 }
 
-func ProcessFeedItems(feedItems []phab_bot.FeedItem, notifyTypesMap map[string]bool, lastMsgTime *time.Time) {
+func ProcessFeedItems(notifyTypesMap map[string]bool, lastMsgTime *time.Time, telegramClient *tgbotapi.BotAPI) {
+
+	feedItems, _ := phab_bot.FetchFeedItems()
+
 	limit := 0
 
 	for _, v := range feedItems {
+
 		if !notifyTypesMap[v.Type] || v.TimeData.Before(*lastMsgTime) || v.TimeData.Equal(*lastMsgTime) || v.IsClose || v.Status == "changes-planned" {
 			continue
 		}
@@ -116,7 +115,7 @@ func ProcessFeedItems(feedItems []phab_bot.FeedItem, notifyTypesMap map[string]b
 
 		topicID, _ := strconv.Atoi(topicIDRaw)
 
-		err := SendMessageTele(viper.GetInt64("telegram.chat_id"), topicID, text, v)
+		err := SendMessageTele(viper.GetInt64("telegram.chat_id"), topicID, text, v, telegramClient)
 		if err != nil {
 			log.Printf("Error sending message: %v", err)
 		}
@@ -142,7 +141,7 @@ func CheckAndSendReport(flag *bool, hour int, telegramClient *tgbotapi.BotAPI) {
 	}
 }
 
-func SendMessageTele(ChatID int64, topicID int, message string, FeedItem phab_bot.FeedItem) error {
+func SendMessageTele(ChatID int64, topicID int, message string, FeedItem phab_bot.FeedItem, telegramClient *tgbotapi.BotAPI) error {
 	msg := tgbotapi.NewThreadMessage(ChatID, topicID, message)
 	msg.ParseMode = "HTML"
 	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(

@@ -12,16 +12,17 @@ import (
 	"github.com/uber/gonduit"
 	"github.com/uber/gonduit/core"
 	"github.com/uber/gonduit/requests"
+	"github.com/uber/gonduit/responses"
 )
 
 // fetchFeed calls feed.query and then uses PHIDLookup to get the actual data for each feed item.
-func FetchFeed(PhabricatorUrl string, PhabricatorToken string, feedItems []FeedItem) ([]FeedItem, error) {
+func FetchFeed(PhabricatorUrl string, PhabricatorToken string) ([]FeedItem, error) {
 	var feed map[string]FeedQueryResponseItem
 	var err error
 	req := &FeedQueryRequest{
 		After: "",
 		View:  "text",
-		Limit: 10,
+		Limit: 100,
 	}
 
 	phabricatorClient, err = gonduit.Dial(PhabricatorUrl, &core.ClientOptions{
@@ -50,24 +51,22 @@ func FetchFeed(PhabricatorUrl string, PhabricatorToken string, feedItems []FeedI
 	})
 
 	phids := make([]string, 0, len(feedList)*2)
+
 	for _, v := range feedList {
 		phids = append(phids, v.AuthorPHID, v.ObjectPHID)
 
 	}
 
-	phids = util.RemoveDuplicates(phids)
-
-	lookedUpPhids, err := phabricatorClient.PHIDLookup(requests.PHIDLookupRequest{
-		Names: phids,
-	})
+	lookedUpPhids, err := LookupID(phabricatorClient, phids)
 
 	if err != nil {
 		return nil, fmt.Errorf("error looking up phids, %s", err)
 	}
 
-	feedItems = feedItems[:len(feed)]
+	feedItems := make([]FeedItem, len(feed))
 
 	for i, v := range feedList {
+
 		diff, _ := getRevisionInfo(v.ObjectPHID)
 
 		feedItems[i] = FeedItem{
@@ -93,6 +92,21 @@ func FetchFeed(PhabricatorUrl string, PhabricatorToken string, feedItems []FeedI
 
 }
 
-func FetchFeedItems(feedItems []FeedItem) ([]FeedItem, error) {
-	return FetchFeed(viper.GetString("phabricator.url"), viper.GetString("phabricator.token"), feedItems)
+func FetchFeedItems() ([]FeedItem, error) {
+	return FetchFeed(viper.GetString("phabricator.url"), viper.GetString("phabricator.token"))
+}
+
+func LookupID(phabricatorClient *gonduit.Conn, phids []string) (responses.PHIDLookupResponse, error) {
+
+	phids = util.RemoveDuplicates(phids)
+
+	lookedUpPhids, err := phabricatorClient.PHIDLookup(requests.PHIDLookupRequest{
+		Names: phids,
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("error looking up phids, %s", err)
+	}
+
+	return lookedUpPhids, nil
 }
