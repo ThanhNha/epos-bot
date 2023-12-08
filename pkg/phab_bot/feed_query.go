@@ -22,7 +22,7 @@ func FetchFeed(PhabricatorUrl string, PhabricatorToken string) ([]FeedItem, erro
 	req := &FeedQueryRequest{
 		After: "",
 		View:  "text",
-		Limit: 100,
+		Limit: 10,
 	}
 
 	phabricatorClient, err = gonduit.Dial(PhabricatorUrl, &core.ClientOptions{

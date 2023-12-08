@@ -27,7 +27,26 @@ type TableContent struct {
 func CreateHtmlFile(tableContent []TableContent) error {
 
 	// Init create File
-	outputPath := filepath.Join("static", "daily-report-revisions.html")
+	folderPath := "static"
+	fileName := "daily-report-revisions.html"
+	outputPath := filepath.Join(folderPath, fileName)
+
+	// Check if the folder exists
+	_, err := os.Stat(folderPath)
+
+	if os.IsNotExist(err) {
+
+		// Create the folder if it doesn't exist
+		errDir := os.Mkdir(folderPath, 0755)
+
+		if errDir != nil {
+
+			fmt.Println(errDir)
+
+			return errDir
+		}
+		fmt.Println("Folder created:", folderPath)
+	}
 
 	file, err := os.Create(outputPath)
 

@@ -1,6 +1,6 @@
 FROM golang:alpine AS builder
 
-
+ENV TZ="Asia/Singapore"
 # Git is required for fetching the dependencies.
 RUN apk update && apk add --no-cache git bash && mkdir -p /build/epos_bot
 
@@ -22,6 +22,8 @@ FROM golang:alpine AS prod
 COPY --from=builder /app/epos_bot /app/epos_bot
 WORKDIR /build/epos_bot
 COPY ./configs/config.json /build/epos_bot/configs/config.json
+
+COPY ./templates/template.html /build/epos_bot/templates/template.html
 
 LABEL org.opencontainers.image.description A docker image for the epos_bot telegram bot.
 

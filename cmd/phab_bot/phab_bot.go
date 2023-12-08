@@ -27,14 +27,18 @@ func FeedActivity(telegramClient *tgbotapi.BotAPI) {
 	notifyTypesMap := phab_bot.CreateNotifyTypesMap(notifyTypes)
 
 	lastMsgTime := time.Now()
+	var flag = false
+
 	for {
-		var flag bool
+
 		currentTime := time.Now()
+
 		hour := currentTime.Hour()
 
+		//reset flag
 		util.ResetFlag(&flag, hour)
 
-		CheckAndSendReport(&flag, hour, telegramClient)
+		flag = CheckAndSendReport(&flag, hour, telegramClient)
 
 		ProcessFeedItems(notifyTypesMap, &lastMsgTime, telegramClient)
 
@@ -130,7 +134,7 @@ func ProcessFeedItems(notifyTypesMap map[string]bool, lastMsgTime *time.Time, te
 	}
 }
 
-func CheckAndSendReport(flag *bool, hour int, telegramClient *tgbotapi.BotAPI) {
+func CheckAndSendReport(flag *bool, hour int, telegramClient *tgbotapi.BotAPI) bool {
 	if !*flag && (hour == 9 || hour == 18) {
 		result, err := SendReportRevisions(telegramClient)
 		if err != nil {
@@ -138,7 +142,10 @@ func CheckAndSendReport(flag *bool, hour int, telegramClient *tgbotapi.BotAPI) {
 		} else {
 			*flag = result
 		}
+		return result
 	}
+	return true
+
 }
 
 func SendMessageTele(ChatID int64, topicID int, message string, FeedItem phab_bot.FeedItem, telegramClient *tgbotapi.BotAPI) error {
