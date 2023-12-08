@@ -8,14 +8,14 @@ import (
 
 	"epos-bot/pkg/util"
 
+	"github.com/spf13/viper"
 	"github.com/uber/gonduit"
 	"github.com/uber/gonduit/core"
 	"github.com/uber/gonduit/requests"
 )
 
-
 // fetchFeed calls feed.query and then uses PHIDLookup to get the actual data for each feed item.
-func FetchFeed(PhabricatorUrl string, PhabricatorToken string) ([]FeedItem, error) {
+func FetchFeed(PhabricatorUrl string, PhabricatorToken string, feedItems []FeedItem) ([]FeedItem, error) {
 	var feed map[string]FeedQueryResponseItem
 	var err error
 	req := &FeedQueryRequest{
@@ -48,6 +48,7 @@ func FetchFeed(PhabricatorUrl string, PhabricatorToken string) ([]FeedItem, erro
 	sort.Slice(feedList, func(i, j int) bool {
 		return feedList[i].Epoch < feedList[j].Epoch
 	})
+
 	phids := make([]string, 0, len(feedList)*2)
 	for _, v := range feedList {
 		phids = append(phids, v.AuthorPHID, v.ObjectPHID)
@@ -63,30 +64,35 @@ func FetchFeed(PhabricatorUrl string, PhabricatorToken string) ([]FeedItem, erro
 	if err != nil {
 		return nil, fmt.Errorf("error looking up phids, %s", err)
 	}
-	var feedItems []FeedItem
-	for _, v := range feedList {
+
+	feedItems = feedItems[:len(feed)]
+
+	for i, v := range feedList {
 		diff, _ := getRevisionInfo(v.ObjectPHID)
 
-		feedItems = append(feedItems, FeedItem{
-			URL:              lookedUpPhids[v.ObjectPHID].URI,
-			Title:            lookedUpPhids[v.ObjectPHID].FullName,
-			ShortTitle:       lookedUpPhids[v.ObjectPHID].Name,
-			Time:             time.Unix(int64(v.Epoch), 0).Format(time.RFC1123),
-			Author:           lookedUpPhids[v.AuthorPHID].FullName,
-			AuthorRevision:   diff.Author,
-			Status:           diff.Status,
-			IsClose:          diff.IsClose,
-			Type:             lookedUpPhids[v.ObjectPHID].Type,
-			TypeName:         lookedUpPhids[v.ObjectPHID].TypeName,
-			TimeData:         time.Unix(int64(v.Epoch), 0),
-			Reviewers:        diff.ListReviewers,
-			Projects:         diff.ListProject,
-			Mentions:         diff.MentionTele,
-			Text:             v.Text,
-			ChronologicalKey: v.ChronologicalKey,
-		})
+		feedItems[i] = FeedItem{
+			URL:            lookedUpPhids[v.ObjectPHID].URI,
+			Title:          lookedUpPhids[v.ObjectPHID].FullName,
+			ShortTitle:     lookedUpPhids[v.ObjectPHID].Name,
+			Time:           time.Unix(int64(v.Epoch), 0).Format(time.RFC1123),
+			Author:         lookedUpPhids[v.AuthorPHID].FullName,
+			AuthorRevision: diff.Author,
+			Status:         diff.Status,
+			IsClose:        diff.IsClose,
+			Type:           lookedUpPhids[v.ObjectPHID].Type,
+			TypeName:       lookedUpPhids[v.ObjectPHID].TypeName,
+			TimeData:       time.Unix(int64(v.Epoch), 0),
+			Reviewers:      diff.ListReviewers,
+			Projects:       diff.ListProject,
+			Mentions:       diff.MentionTele,
+			Text:           v.Text,
+		}
 	}
 
 	return feedItems, nil
 
+}
+
+func FetchFeedItems(feedItems []FeedItem) ([]FeedItem, error) {
+	return FetchFeed(viper.GetString("phabricator.url"), viper.GetString("phabricator.token"), feedItems)
 }

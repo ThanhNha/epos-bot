@@ -22,83 +22,30 @@ var phabricatorClient *gonduit.Conn
 
 func FeedActivity(telegramClient *tgbotapi.BotAPI) {
 
-	notifyTypes := viper.GetStringSlice("telegram.notify_types")
+	fmt.Println("feedItems")
 
-	TopicForTypes := viper.GetStringMapString("telegram.topic_id_mapping")
+	notifyTypes := phab_bot.GetNotifyTypes()
 
-	if len(notifyTypes) == 0 {
-		notifyTypes = []string{"TASK", "DREV", "WIKI"}
-		log.Printf("No notify types specified, defaulting to %v", notifyTypes)
-	}
+	notifyTypesMap := phab_bot.CreateNotifyTypesMap(notifyTypes)
 
-	notifyTypesMap := make(map[string]bool)
-	for _, v := range notifyTypes {
-		notifyTypesMap[v] = true
-	}
-
-	var lastMsgTime = time.Now()
-
+	lastMsgTime := time.Now()
+	feedItems := make([]phab_bot.FeedItem,0,1000)
 	for {
-		flag := false
-		var CurrentTime = time.Now()
-		hour := CurrentTime.Hour()
-		//reset flag
-		if hour != 9 && hour != 18 && flag {
-			flag = false
-		}
+		var flag bool
+		currentTime := time.Now()
+		hour := currentTime.Hour()
 
-		// Check Condition to excute func send report
-		if !flag && hour == 9 || hour == 9 {
+		util.ResetFlag(&flag, hour)
 
-			result, _ := SendReportRevisions(telegramClient)
-			//sent, active flag to prevent send
-			flag = result
+		CheckAndSendReport(&flag, hour, telegramClient)
 
-		}
+		phab_bot.FetchFeedItems(feedItems)
 
-		feedItems, err := phab_bot.FetchFeed(viper.GetString("phabricator.url"), viper.GetString("phabricator.token"))
+		ProcessFeedItems(feedItems, notifyTypesMap, &lastMsgTime)
 
-		if err != nil {
-			log.Fatalf("Error fetching feed, %s", err)
-		}
+		pollInterval := viper.GetDuration("phabricator.poll_interval")
 
-		var limit = 0
-
-		for _, v := range feedItems {
-
-			if !notifyTypesMap[v.Type] || v.TimeData.Before(lastMsgTime) || v.TimeData == lastMsgTime || v.IsClose || v.Status == "changes-planned" {
-				continue
-			}
-
-			text := phab_bot.PrepareMessage(v)
-
-			topicID, err := strconv.Atoi(TopicForTypes[strings.ToLower(v.Type)])
-
-			msg := tgbotapi.NewThreadMessage(viper.GetInt64("telegram.chat_id"), topicID, text)
-			msg.ParseMode = "HTML"
-			msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
-				tgbotapi.NewInlineKeyboardRow(
-					tgbotapi.NewInlineKeyboardButtonURL(v.ShortTitle, v.URL),
-				),
-			)
-
-			_, err = telegramClient.Send(msg)
-
-			if err != nil {
-				log.Printf("Sending message errir %v", err)
-			}
-
-			lastMsgTime = v.TimeData
-			limit++
-			if limit > 10 {
-				log.Printf("Limit reached, stopping for 5 seconds")
-				time.Sleep(time.Second * 5)
-				limit = 0
-			}
-
-		}
-
-		time.Sleep(viper.GetDuration("phabricator.poll_interval"))
+		time.Sleep(pollInterval)
 	}
 }
 
@@ -150,4 +97,61 @@ func SendReportRevisions(telegramClient *tgbotapi.BotAPI) (bool, error) {
 
 	return true, nil
 
+}
+
+func ProcessFeedItems(feedItems []phab_bot.FeedItem, notifyTypesMap map[string]bool, lastMsgTime *time.Time) {
+	limit := 0
+
+	for _, v := range feedItems {
+		if !notifyTypesMap[v.Type] || v.TimeData.Before(*lastMsgTime) || v.TimeData.Equal(*lastMsgTime) || v.IsClose || v.Status == "changes-planned" {
+			continue
+		}
+
+		text := phab_bot.PrepareMessage(v)
+		topicIDRaw, ok := viper.GetStringMapString("telegram.topic_id_mapping")[strings.ToLower(v.Type)]
+		if !ok {
+			log.Printf("Topic ID not found for type: %s", v.Type)
+			continue
+		}
+
+		topicID, _ := strconv.Atoi(topicIDRaw)
+
+		err := SendMessageTele(viper.GetInt64("telegram.chat_id"), topicID, text, v)
+		if err != nil {
+			log.Printf("Error sending message: %v", err)
+		}
+
+		*lastMsgTime = v.TimeData
+		limit++
+		if limit > 10 {
+			log.Printf("Limit reached, pausing for 5 seconds")
+			time.Sleep(time.Second * 5)
+			limit = 0
+		}
+	}
+}
+
+func CheckAndSendReport(flag *bool, hour int, telegramClient *tgbotapi.BotAPI) {
+	if !*flag && (hour == 9 || hour == 18) {
+		result, err := SendReportRevisions(telegramClient)
+		if err != nil {
+			log.Printf("Error sending report revisions: %v", err)
+		} else {
+			*flag = result
+		}
+	}
+}
+
+func SendMessageTele(ChatID int64, topicID int, message string, FeedItem phab_bot.FeedItem) error {
+	msg := tgbotapi.NewThreadMessage(ChatID, topicID, message)
+	msg.ParseMode = "HTML"
+	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonURL(FeedItem.ShortTitle, FeedItem.URL),
+		),
+	)
+
+	_, err := telegramClient.Send(msg)
+
+	return err
 }
