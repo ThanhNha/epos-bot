@@ -35,10 +35,21 @@ func FeedActivity(telegramClient *tgbotapi.BotAPI) {
 
 		hour := currentTime.Hour()
 
-		//reset flag
-		util.ResetFlag(&flag, hour)
+		if hour != 9 && hour != 18 && flag {
+			flag = false
+		}
 
-		flag = CheckAndSendReport(&flag, hour, telegramClient)
+		// Check Condition to excute func send report
+		if hour == 9 || hour == 18 {
+
+			if !flag {
+				result, _ := SendReportRevisions(telegramClient)
+				flag = result
+			}
+
+		}
+
+	//reset flag
 
 		ProcessFeedItems(notifyTypesMap, &lastMsgTime, telegramClient)
 
@@ -134,19 +145,6 @@ func ProcessFeedItems(notifyTypesMap map[string]bool, lastMsgTime *time.Time, te
 	}
 }
 
-func CheckAndSendReport(flag *bool, hour int, telegramClient *tgbotapi.BotAPI) bool {
-	if !*flag && (hour == 9 || hour == 18) {
-		result, err := SendReportRevisions(telegramClient)
-		if err != nil {
-			log.Printf("Error sending report revisions: %v", err)
-		} else {
-			*flag = result
-		}
-		return result
-	}
-	return true
-
-}
 
 func SendMessageTele(ChatID int64, topicID int, message string, FeedItem phab_bot.FeedItem, telegramClient *tgbotapi.BotAPI) error {
 	msg := tgbotapi.NewThreadMessage(ChatID, topicID, message)
